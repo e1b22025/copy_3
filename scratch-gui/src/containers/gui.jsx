@@ -79,11 +79,19 @@ class GUI extends React.Component {
     // 📸 ここを新しく追加: BlocksコンポーネントからDOM要素を受け取るコールバック（アロー関数で自動バインド）
     onBlocksDOMRef = (domElement) => {
         this.blocksDOMElement = domElement;
+        console.log('Blocks DOM Element:', domElement); // 📸 この行を追加
+    if (domElement) {
+        console.log('DOM Element is valid, its tag name is:', domElement.tagName);
+    } else {
+        console.log('DOM Element is null or undefined.');
+    }
     };
 
     // 📸 スクリーンショットを撮るメソッド（アロー関数で自動バインド）
     onScreenshotClick = () => {
+        console.log('スクリーンショットボタンがクリックされました！'); // 📸 この行を追加
         if (this.blocksDOMElement) {
+            console.log('html2canvasでキャプチャ対象のDOM要素:', this.blocksDOMElement); // 📸 この行を追加
             html2canvas(this.blocksDOMElement, {
                 useCORS: true,
                 scrollX: -window.scrollX,
@@ -91,6 +99,7 @@ class GUI extends React.Component {
                 windowWidth: document.documentElement.offsetWidth,
                 windowHeight: document.documentElement.offsetHeight
             }).then(canvas => {
+                 console.log('html2canvasでキャプチャが成功しました。画像をダウンロードします。'); // 📸 この行を追加
                 const link = document.createElement('a');
                 link.download = 'scratch_program_screenshot.png';
                 link.href = canvas.toDataURL('image/png');
