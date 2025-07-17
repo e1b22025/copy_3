@@ -6,6 +6,7 @@ import {defineMessages, injectIntl, intlShape} from 'react-intl';
 import GreenFlag from '../green-flag/green-flag.jsx';
 import StopAll from '../stop-all/stop-all.jsx';
 import TurboMode from '../turbo-mode/turbo-mode.jsx';
+import IconButton from '../icon-button/icon-button.jsx'; // 新しく追加
 
 import styles from './controls.css';
 
@@ -19,6 +20,11 @@ const messages = defineMessages({
         id: 'gui.controls.stop',
         defaultMessage: 'Stop',
         description: 'Stop button title'
+    },
+     screenshotTitle: { // 新しく追加
+        id: 'gui.controls.screenshot',
+        defaultMessage: 'Screenshot',
+        description: 'Screenshot button title'
     }
 });
 
@@ -29,6 +35,7 @@ const Controls = function (props) {
         intl,
         onGreenFlagClick,
         onStopAllClick,
+        onScreenshotClick, // 新しく追加
         turbo,
         ...componentProps
     } = props;
@@ -47,6 +54,16 @@ const Controls = function (props) {
                 title={intl.formatMessage(messages.stopTitle)}
                 onClick={onStopAllClick}
             />
+            <IconButton // 新しく追加
+                className={styles.screenshotButton} // 新しいスタイルクラスを適用
+                title={intl.formatMessage(messages.screenshotTitle)}
+                onClick={onScreenshotClick}
+            >
+                {/* ここにスクリーンショットボタンのアイコンを配置します */}
+                {/* 例: <img src={cameraIcon} /> または SVG など */}
+                {/* 現状はテキストで「SS」と表示します */}
+                SS
+            </IconButton>
             {turbo ? (
                 <TurboMode />
             ) : null}
@@ -60,12 +77,14 @@ Controls.propTypes = {
     intl: intlShape.isRequired,
     onGreenFlagClick: PropTypes.func.isRequired,
     onStopAllClick: PropTypes.func.isRequired,
+    onScreenshotClick: PropTypes.func.isRequired, // 新しく追加
     turbo: PropTypes.bool
 };
 
 Controls.defaultProps = {
     active: false,
-    turbo: false
+    turbo: false,
+    onScreenshotClick: () => {} // デフォルトの空関数を設定
 };
 
 export default injectIntl(Controls);

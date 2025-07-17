@@ -490,6 +490,10 @@ class Blocks extends React.Component {
     }
     setBlocks (blocks) {
         this.blocks = blocks;
+         // 📸 ここを新しく追加: 受け取ったDOM要素を親コンポーネントに渡す
+        if (typeof this.props.onBlocksRef === 'function') {
+            this.props.onBlocksRef(blocks);
+        }
     }
     handlePromptStart (message, defaultValue, callback, optTitle, optVarType) {
         const p = {prompt: {callback, message, defaultValue}};
@@ -567,6 +571,7 @@ class Blocks extends React.Component {
             updateMetrics: updateMetricsProp,
             useCatBlocks,
             workspaceMetrics,
+            onBlocksRef,
             ...props
         } = this.props;
         /* eslint-enable no-unused-vars */
@@ -645,7 +650,8 @@ Blocks.propTypes = {
     vm: PropTypes.instanceOf(VM).isRequired,
     workspaceMetrics: PropTypes.shape({
         targets: PropTypes.objectOf(PropTypes.object)
-    })
+    }),
+    onBlocksRef: PropTypes.func
 };
 
 Blocks.defaultOptions = {
@@ -667,7 +673,8 @@ Blocks.defaultOptions = {
 Blocks.defaultProps = {
     isVisible: true,
     options: Blocks.defaultOptions,
-    theme: DEFAULT_THEME
+    theme: DEFAULT_THEME,
+    onBlocksRef: () => {}
 };
 
 const mapStateToProps = state => ({
