@@ -1,3 +1,26 @@
 .controls-container {
     display: flex;
+     align-items: center; /* 追加または確認 */
+}
+.screenshotButton {
+    /* StopAllボタンの右隣に配置するためのマージン調整など */
+    margin-left: 0.5rem; /* StopAllボタンとの間にスペースを設ける */
+    /* 必要に応じて、ボタンのサイズ、色などを調整 */
+    background-color: #4C97FF; /* 例: スクラッチの青色 */
+    color: white;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem; /* 適切なサイズに調整 */
+    min-height: 2.5rem; /* 適切なサイズに調整 */
+}
+
+.screenshotButton:hover {
+    background-color: #337FFF; /* ホバー時の色 */
 }
