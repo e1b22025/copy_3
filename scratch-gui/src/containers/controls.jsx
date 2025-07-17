@@ -35,6 +35,7 @@ class Controls extends React.Component {
             isStarted, // eslint-disable-line no-unused-vars
             projectRunning,
             turbo,
+            onScreenshotClick, // 📸 ここを新しく追加: propsから受け取るようにデストラクチャリング
             ...props
         } = this.props;
         return (
@@ -44,6 +45,7 @@ class Controls extends React.Component {
                 turbo={turbo}
                 onGreenFlagClick={this.handleGreenFlagClick}
                 onStopAllClick={this.handleStopAllClick}
+                onScreenshotClick={onScreenshotClick} // 📸 ここを新しく追加: ControlsComponentに渡す
             />
         );
     }
@@ -53,7 +55,12 @@ Controls.propTypes = {
     isStarted: PropTypes.bool.isRequired,
     projectRunning: PropTypes.bool.isRequired,
     turbo: PropTypes.bool.isRequired,
-    vm: PropTypes.instanceOf(VM)
+    vm: PropTypes.instanceOf(VM),
+    onScreenshotClick: PropTypes.func // 📸 ここを新しく追加
+};
+
+Controls.defaultProps = {
+    onScreenshotClick: () => {} // 📸 デフォルトの空関数を設定
 };
 
 const mapStateToProps = state => ({

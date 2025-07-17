@@ -120,6 +120,7 @@ const GUIComponent = props => {
         onRequestCloseCostumeLibrary,
         onRequestCloseDebugModal,
         onRequestCloseTelemetryModal,
+        onScreenshotClick, // 📸 ここを新しく追加
         onSeeCommunity,
         onShare,
         onShowPrivacyPolicy,
@@ -139,6 +140,7 @@ const GUIComponent = props => {
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
+    console.log('GUIComponent で onScreenshotClick を受け取りました:', onScreenshotClick); // 📸 この行を追加
     if (children) {
         return <Box {...componentProps}>{children}</Box>;
     }
@@ -468,6 +470,7 @@ GUIComponent.propTypes = {
     onRequestCloseCostumeLibrary: PropTypes.func,
     onRequestCloseDebugModal: PropTypes.func,
     onRequestCloseTelemetryModal: PropTypes.func,
+    onScreenshotClick: PropTypes.func, // 📸 ここを新しく追加
     onSeeCommunity: PropTypes.func,
     onShare: PropTypes.func,
     onShowPrivacyPolicy: PropTypes.func,
@@ -509,6 +512,7 @@ GUIComponent.defaultProps = {
     isTotallyNormal: false,
     loading: false,
      onBlocksRef: () => {}, // 📸 デフォルトの空関数を設定
+    onScreenshotClick: () => {}, // 📸 デフォルトの空関数を設定
     showComingSoon: false,
     stageSizeMode: STAGE_SIZE_MODES.large
 };

@@ -39,6 +39,8 @@ const Controls = function (props) {
         turbo,
         ...componentProps
     } = props;
+    console.log('ControlsComponent で onScreenshotClick を受け取りました:', onScreenshotClick); // 📸 この行を追加
+
     return (
         <div
             className={classNames(styles.controlsContainer, className)}
@@ -57,7 +59,12 @@ const Controls = function (props) {
             <IconButton // 新しく追加
                 className={styles.screenshotButton} // 新しいスタイルクラスを適用
                 title={intl.formatMessage(messages.screenshotTitle)}
-                onClick={onScreenshotClick}
+                onClick={() => { // 📸 ここを修正: 直接無名関数でログを出力
+                    console.log('スクリーンショットボタンが `onClick` で押されました！');
+                    if (onScreenshotClick) {
+                        onScreenshotClick(); // 元のハンドラを呼び出す
+                    }
+                }}
             >
                 {/* ここにスクリーンショットボタンのアイコンを配置します */}
                 {/* 例: <img src={cameraIcon} /> または SVG など */}
