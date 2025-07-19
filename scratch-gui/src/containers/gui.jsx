@@ -1,8 +1,5 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import classNames from 'classnames';
-import bindAll from 'lodash.bindall'; // bindAllは必要なくなったものの、他の場所で使われている可能性があるので残しておきますが、今回は使いません。
-import debounce from 'lodash.debounce';
 import {compose} from 'redux';
 import {connect} from 'react-redux';
 import ReactModal from 'react-modal';
@@ -44,15 +41,16 @@ import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
 
 import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
-import html2canvas from 'html2canvas';
 
+
+//import { highlightBlocksSequentially } from '../lib/highlight-helper';
 
 import {
   getSortedBlockIds,
   highlightBlocksSequentially
-} from '../lib/highlight-helper';
+} from '../lib/highlight-helper';//追加
 
-import highlightBlock from '../lib/highlight-block';
+import highlightBlock from '../lib/highlight-block'; // **変更点:** これを追加
 
 const {RequestMetadata, setMetadata, unsetMetadata} = storage.scratchFetch;
 
@@ -70,50 +68,12 @@ class GUI extends React.Component {
 
     constructor(props) {
         super(props);
-        // 📸 `bindAll` はこのプロジェクトのスタイルに合わないため削除しました。
-        // 代わりに、メソッドはアロー関数として定義するか、個別にバインドします。
-        // ここでバインドが必要な既存のメソッドがあれば、個別に `this.methodName = this.methodName.bind(this);` のように追加してください。
-        this.blocksDOMElement = null; // BlocklyワークスペースのDOM要素を格納
+        this.blocksRef = null;
     }
 
-    // 📸 ここを新しく追加: BlocksコンポーネントからDOM要素を受け取るコールバック（アロー関数で自動バインド）
-    onBlocksDOMRef = (domElement) => {
-        this.blocksDOMElement = domElement;
-        console.log('Blocks DOM Element:', domElement); // 📸 この行を追加
-    if (domElement) {
-        console.log('DOM Element is valid, its tag name is:', domElement.tagName);
-    } else {
-        console.log('DOM Element is null or undefined.');
-    }
+    setBlocksRef = (ref) => {
+        this.blocksRef = ref;
     };
-
-    // 📸 スクリーンショットを撮るメソッド（アロー関数で自動バインド）
-    onScreenshotClick = () => {
-        console.log('スクリーンショットボタンがクリックされました！'); // 📸 この行を追加
-        if (this.blocksDOMElement) {
-            console.log('html2canvasでキャプチャ対象のDOM要素:', this.blocksDOMElement); // 📸 この行を追加
-            html2canvas(this.blocksDOMElement, {
-                useCORS: true,
-                scrollX: -window.scrollX,
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.offsetWidth,
-                windowHeight: document.documentElement.offsetHeight
-            }).then(canvas => {
-                 console.log('html2canvasでキャプチャが成功しました。画像をダウンロードします。'); // 📸 この行を追加
-                const link = document.createElement('a');
-                link.download = 'scratch_program_screenshot.png';
-                link.href = canvas.toDataURL('image/png');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }).catch(err => {
-                console.error("スクリーンショットの生成中にエラーが発生しました:", err);
-            });
-        } else {
-            console.warn("スクリーンショットを撮るためのDOM要素が見つかりませんでした。");
-        }
-    };
-
 
     componentDidMount () {
         setIsScratchDesktop(this.props.isScratchDesktop);
@@ -122,14 +82,11 @@ class GUI extends React.Component {
         setProjectIdMetadata(this.props.projectId);
 
         setTimeout(() => {
-            // 📸 this.blocksDOMElement に `workspace` プロパティが直接あるかは、
-            // Blocklyの注入方法に依存します。もしエラーが発生する場合は、
-            // `this.blocksDOMElement.querySelector('.blocklyWorkspace')`
-            // のように、内部の要素を特定する必要があるかもしれません。
-            const workspace = this.blocksDOMElement?.workspace;
+            const workspace = this.blocksRef?.workspace;
             if (workspace) {
                 const moveBlock = workspace.getAllBlocks(false).find(block => block.type === 'motion_movesteps');
                  if (moveBlock) {
+                // **変更点:** ヘルパー関数を使用
                     highlightBlock(workspace, moveBlock.id, true);
                     setTimeout(() => {
                         highlightBlock(workspace, moveBlock.id, false);
@@ -142,24 +99,27 @@ class GUI extends React.Component {
     }
     componentDidUpdate (prevProps) {
         if (this.props.isShowingProject && !prevProps.isShowingProject) {
-            const workspace = this.blocksDOMElement?.workspace;
-            if (workspace) {
-                const highlightNextBackdropBlock = () => {
-                    const targetBlock = workspace.getAllBlocks(false).find(
-                        block => block.type === 'looks_nextbackdrop'
-                    );
-                    if (targetBlock) {
-                        highlightBlock(workspace, targetBlock.id, true);
-                    }
-                };
-
-                highlightNextBackdropBlock();
-
-                workspace.addChangeListener(() => {
-                    highlightNextBackdropBlock();
-                });
+    const workspace = this.blocksRef?.workspace;
+    if (workspace) {
+        const highlightNextBackdropBlock = () => {
+            const targetBlock = workspace.getAllBlocks(false).find(
+                block => block.type === 'looks_nextbackdrop'
+            );
+            if (targetBlock) {
+                highlightBlock(workspace, targetBlock.id, true);
             }
-        }
+        };
+
+        highlightNextBackdropBlock();
+
+        // Persistent highlight on workspace changes
+        workspace.addChangeListener(() => {
+            // 変更リスナー内でクラスが重複して追加されないように注意
+            // `classList.add` は要素にクラスが既に存在する場合は何もしません
+            highlightNextBackdropBlock();
+        });
+    }
+}
 
         if (this.props.projectId !== prevProps.projectId) {
             if (this.props.projectId !== null) {
@@ -168,14 +128,17 @@ class GUI extends React.Component {
             setProjectIdMetadata(this.props.projectId);
         }
         if (this.props.isShowingProject && !prevProps.isShowingProject) {
+            // this only notifies container when a project changes from not yet loaded to loaded
+            // At this time the project view in www doesn't need to know when a project is unloaded
             this.props.onProjectLoaded();
 
-            const workspace = this.blocksDOMElement?.workspace;
+            const workspace = this.blocksRef?.workspace;
             if (workspace) {
                 const targetBlock = workspace.getAllBlocks(false).find(
                     block => block.type === 'looks_nextbackdrop'
                 );
                 if (targetBlock) {
+                    // 赤色で強調表示するために CSS を追加
                     const blockSvg = targetBlock.getSvgRoot();
                     if (blockSvg) {
                         blockSvg.style.stroke = 'red';
@@ -213,15 +176,13 @@ class GUI extends React.Component {
             fetchingProject,
             isLoading,
             loadingStateVisible,
-            // setBlocksRef, // 📸 削除
             ...componentProps
         } = this.props;
         return (
             <GUIComponent
                 loading={fetchingProject || isLoading || loadingStateVisible}
                 {...componentProps}
-                onScreenshotClick={this.onScreenshotClick} // 📸 Controlsに渡すハンドラ
-                onBlocksRef={this.onBlocksDOMRef} // 📸 GUIComponentにDOM参照コールバックを渡す
+                setBlocksRef={this.setBlocksRef}
             >
                 {children}
             </GUIComponent>
@@ -310,6 +271,9 @@ const ConnectedGUI = injectIntl(connect(
     mapDispatchToProps
 )(GUI));
 
+// note that redux's 'compose' function is just being used as a general utility to make
+// the hierarchy of HOC constructor calls clearer here; it has nothing to do with redux's
+// ability to compose reducers.
 const WrappedGui = compose(
     LocalizationHOC,
     ErrorBoundaryHOC('Top Level App'),
@@ -327,3 +291,11 @@ const WrappedGui = compose(
 
 WrappedGui.setAppElement = ReactModal.setAppElement;
 export default WrappedGui;
+
+
+
+//workspace.addChangeListener((event) => {
+  //if (event.type === Blockly.Events.SELECTED) {
+    //console.log('Selected block ID:', event.newElementId);
+  //}
+//});

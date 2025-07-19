@@ -120,7 +120,6 @@ const GUIComponent = props => {
         onRequestCloseCostumeLibrary,
         onRequestCloseDebugModal,
         onRequestCloseTelemetryModal,
-        onScreenshotClick, // 📸 ここを新しく追加
         onSeeCommunity,
         onShare,
         onShowPrivacyPolicy,
@@ -129,7 +128,6 @@ const GUIComponent = props => {
         onTelemetryModalOptIn,
         onTelemetryModalOptOut,
         setBlocksRef,
-        onBlocksRef, // 📸 ここを新しく追加: `containers/gui.jsx`からDOM要素を受け取るコールバック
         showComingSoon,
         soundsTabVisible,
         stageSizeMode,
@@ -140,7 +138,6 @@ const GUIComponent = props => {
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
-    console.log('GUIComponent で onScreenshotClick を受け取りました:', onScreenshotClick); // 📸 この行を追加
     if (children) {
         return <Box {...componentProps}>{children}</Box>;
     }
@@ -340,15 +337,14 @@ const GUIComponent = props => {
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     <Box className={styles.blocksWrapper}>
                                         <Blocks
-                                            //ref={blocksComponent => {
-                                                //if (blocksComponent && typeof props.setBlocksRef === 'function') {
-                                                    //props.setBlocksRef(blocksComponent);
-                                                //}
-                                            //}}
+                                            ref={blocksComponent => {
+                                                if (blocksComponent && typeof props.setBlocksRef === 'function') {
+                                                    props.setBlocksRef(blocksComponent);
+                                                }
+                                            }}
                                              // Function components cannot be given refs directly.
                                             // Pass the ref function through a prop, e.g., containerRef
                                            //containerRef={props.setBlocksRef}
-                                           onBlocksRef={onBlocksRef} // 📸 ここを新しく追加: DOM要素を親に伝えるコールバック
                                             key={`${blocksId}/${theme}`}
                                             canUseCloud={canUseCloud}
                                             grow={1}
@@ -459,7 +455,6 @@ GUIComponent.propTypes = {
     onActivateSoundsTab: PropTypes.func,
     onActivateHitsTab: PropTypes.func,
     onActivateTab: PropTypes.func,
-    onBlocksRef: PropTypes.func, // 📸 ここを新しく追加
     onClickAccountNav: PropTypes.func,
     onClickLogo: PropTypes.func,
     onCloseAccountNav: PropTypes.func,
@@ -470,7 +465,6 @@ GUIComponent.propTypes = {
     onRequestCloseCostumeLibrary: PropTypes.func,
     onRequestCloseDebugModal: PropTypes.func,
     onRequestCloseTelemetryModal: PropTypes.func,
-    onScreenshotClick: PropTypes.func, // 📸 ここを新しく追加
     onSeeCommunity: PropTypes.func,
     onShare: PropTypes.func,
     onShowPrivacyPolicy: PropTypes.func,
@@ -481,7 +475,6 @@ GUIComponent.propTypes = {
     onTelemetryModalOptOut: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
     renderLogin: PropTypes.func,
-    setBlocksRef: PropTypes.func, // `containers/gui.jsx`からの参照セッター
     showComingSoon: PropTypes.bool,
     soundsTabVisible: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
@@ -511,8 +504,6 @@ GUIComponent.defaultProps = {
     isShared: false,
     isTotallyNormal: false,
     loading: false,
-     onBlocksRef: () => {}, // 📸 デフォルトの空関数を設定
-    onScreenshotClick: () => {}, // 📸 デフォルトの空関数を設定
     showComingSoon: false,
     stageSizeMode: STAGE_SIZE_MODES.large
 };
